@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="?android:attr/listPreferredItemHeight"
+    android:orientation="horizontal"
+    android:padding="@dimen/abc_list_item_padding_horizontal_material"
+    android:gravity="center_vertical">
+
+    <ImageView
+        android:id="@+id/list_artist_search_result_imageview"
+        android:layout_width="@dimen/spotify_image_width"
+        android:layout_height="@dimen/spotify_image_height" />
+
+    <TextView
+        android:id="@+id/list_artist_search_result_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/activity_horizontal_margin" />
+
+</LinearLayout>

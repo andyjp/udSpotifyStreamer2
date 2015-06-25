@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Spotify Streamer</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_tracks">Top 10 Tracks</string>
+
+    <string name="search_hint">Search Artists</string>
+
+    <string name="internet_connection_error">No internet connection. Please verify you are connected to the internet.</string>
+    <string name="no_artist_found">No artist found for %1$s. Please search again.</string>
+
+</resources>
