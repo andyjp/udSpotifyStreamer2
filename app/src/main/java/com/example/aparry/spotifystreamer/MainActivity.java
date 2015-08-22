@@ -4,11 +4,14 @@ import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-
 public class MainActivity extends AppCompatActivity {
+
+    private static final String LOG_TAG = MainActivity.class.getName();
+    TrackPlayerService trackPlayerService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -16,19 +19,20 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        if (savedInstanceState == null) {
+        if (savedInstanceState == null && !getResources().getBoolean(R.bool.large_layout)) {
             // Add the fragment FrameLayout
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.main_fragment_container, new MainActivityFragment()).commit();
+                    .add(R.id.main_fragment, new MainActivityFragment()).commit();
         }
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            Log.v(LOG_TAG, "New search");
             String query = intent.getStringExtra(SearchManager.QUERY);
 
-            MainActivityFragment mainActivityFragment = (MainActivityFragment) getSupportFragmentManager().findFragmentById(R.id.main_fragment_container);
+            MainActivityFragment mainActivityFragment = (MainActivityFragment) getSupportFragmentManager().findFragmentById(R.id.main_fragment);
             mainActivityFragment.newSearch(query);
         }
     }
@@ -53,5 +57,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        getSupportFragmentManager().popBackStack();
+        return super.onSupportNavigateUp();
     }
 }

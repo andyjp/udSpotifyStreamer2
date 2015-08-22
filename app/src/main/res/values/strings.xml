@@ -7,5 +7,16 @@
 
     <string name="internet_connection_error">No internet connection. Please verify you are connected to the internet.</string>
     <string name="no_artist_found">No artist found for %1$s. Please search again.</string>
+    <string name="no_tracks_found">No tracks found for this artist.</string>
+
+    <string name="tracks_retrieve_error">Error retrieving tracks.</string>
+
+    <string name="pause">Pause</string>
+    <string name="play">Play</string>
+    <string name="previous">Previous</string>
+    <string name="next">Next</string>
+
+    <string name="title_artist_list">Tracks</string>
+    <string name="title_artist_detail">Artist Detail</string>
 
 </resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <fragment class="com.example.aparry.spotifystreamer.MainActivityFragment"
+        android:id="@+id/main_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="3" />
+
+    <Space
+        android:layout_width="2dp"
+        android:layout_height="match_parent"
+        android:background="@android:color/black" />
+
+    <fragment class="com.example.aparry.spotifystreamer.TracksFragment"
+        android:id="@+id/tracks_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="2" />
+
+</LinearLayout>
