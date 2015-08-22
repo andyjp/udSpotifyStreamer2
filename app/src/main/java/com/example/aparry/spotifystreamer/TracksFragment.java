@@ -76,10 +76,8 @@ public class TracksFragment extends Fragment {
                 trackPlayerFragment.setArguments(bundle);
 
                 if (getResources().getBoolean(R.bool.large_layout)) {
-                    Log.v("TracksFragment", "large layout option");
                     trackPlayerFragment.show(fragmentManager, "dialog");
                 } else {
-                    Log.v("TracksFragment", "small layout option");
                     fragmentManager.beginTransaction()
                             .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                             .replace(R.id.main_fragment, trackPlayerFragment)

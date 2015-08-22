@@ -40,7 +40,6 @@ public class TrackPlayerService extends Service
     Integer notificationId = 1;
 
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.v(LOG_TAG, "onStartCommand() called");
         if (intent != null && intent.getAction() != null) {
             switch (intent.getAction()) {
                 case "com.example.aparry.spotifystreamer.PLAY":
@@ -104,7 +103,6 @@ public class TrackPlayerService extends Service
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        Log.v("TrackPlayerService", "onPrepared");
         duration = mediaPlayer.getDuration();
         mediaPlayer.start();
         boundServiceListener.updateTrackPlayer(true);
@@ -113,7 +111,6 @@ public class TrackPlayerService extends Service
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        Log.v(LOG_TAG, "onCompletion");
         boundServiceListener.updateTrackPlayer(false);
         createNotification("pause");
     }
@@ -142,7 +139,6 @@ public class TrackPlayerService extends Service
             mediaPlayer.start();
             boundServiceListener.updateTrackPlayer(false);
             createNotification("play");
-            Log.v(LOG_TAG, "play song media player start");
         }
     }
 

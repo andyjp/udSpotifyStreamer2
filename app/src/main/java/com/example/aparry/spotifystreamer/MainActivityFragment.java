@@ -103,7 +103,6 @@ public class MainActivityFragment extends Fragment {
             // Get artists
             FetchArtistTask search = new FetchArtistTask();
             search.execute(query);
-            Log.v(LOG_TAG,"search execute");
         } else {
             Toast.makeText(
                     getActivity(),

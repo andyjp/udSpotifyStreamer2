@@ -36,9 +36,6 @@ public class TrackPlayerFragment extends DialogFragment implements SeekBar.OnSee
     private ServiceConnection trackPlayerConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.v(LOG_TAG, "onServiceConnected() called");
-            Log.v(LOG_TAG, "track player bound = " + trackPlayerBound);
-
             trackPlayerBound = true;
 
             TrackPlayerService.TrackPlayerBinder binder = (TrackPlayerService.TrackPlayerBinder) service;
@@ -60,8 +57,6 @@ public class TrackPlayerFragment extends DialogFragment implements SeekBar.OnSee
                         endTime.setText(String.format("%2d:%02d", trackPlayerService.duration / 60000, trackPlayerService.duration / 1000));
 
                         if (trackPlayerService.mediaPlayer.isPlaying()) {
-                            Log.v(LOG_TAG, "track is playing");
-
                             // Create thread for updating the seek bar as track plays
                             new Thread(new Runnable() {
                                 @Override
@@ -117,7 +112,6 @@ public class TrackPlayerFragment extends DialogFragment implements SeekBar.OnSee
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.v(LOG_TAG, "onCreateView() called");
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_track_player, container, false);
 
@@ -132,7 +126,6 @@ public class TrackPlayerFragment extends DialogFragment implements SeekBar.OnSee
             playIntent.putExtra("Position", position);
         }
         if (savedInstanceState == null) {
-            Log.v(LOG_TAG, "saved instance is null");
             getActivity().startService(playIntent);
         }
         getActivity().bindService(playIntent, trackPlayerConnection, Context.BIND_AUTO_CREATE);
@@ -180,12 +173,9 @@ public class TrackPlayerFragment extends DialogFragment implements SeekBar.OnSee
 
     @Override
     public void onStop() {
-        Log.v(LOG_TAG, "onStop() called");
         // Unbind the service when the track player dialog is closed
-        Log.v(LOG_TAG,"track player bound = " + trackPlayerBound);
         trackPlayerBound = false;
         getActivity().unbindService(trackPlayerConnection);
-        Log.v(LOG_TAG, "track player bound = " + trackPlayerBound);
         super.onStop();
     }
 
