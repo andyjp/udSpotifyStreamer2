@@ -9,6 +9,8 @@ import android.support.v4.app.DialogFragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -177,6 +179,13 @@ public class TrackPlayerFragment extends DialogFragment implements SeekBar.OnSee
         trackPlayerBound = false;
         getActivity().unbindService(trackPlayerConnection);
         super.onStop();
+    }
+
+    @Override
+    public void onDestroyView() {
+        if (getDialog() != null && getRetainInstance())
+            getDialog().setDismissMessage(null);
+        super.onDestroyView();
     }
 
     public void setTrackInfo() {
