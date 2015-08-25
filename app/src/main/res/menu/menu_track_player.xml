@@ -7,15 +7,9 @@
         android:orderInCategory="100"
         app:showAsAction="never" />
     <item
-        android:id="@+id/now_playing_button"
-        android:title="@string/now_playing"
-        app:showAsAction="ifRoom"
-        app:actionViewClass="android.support.v7.widget.AppCompatButton"
-        android:visible="false" />
-    <item
         android:id="@+id/share_track"
-        android:title="@string/share_track"
+        android:title="Share"
         app:showAsAction="ifRoom"
-        app:actionProviderClass="android.support.v7.widget.ShareActionProvider"
-        android:visible="false"/>
+        app:actionProviderClass="android.support.v7.widget.ShareActionProvider" />
+    <!--android:icon="@android:drawable/button_onoff_indicator_off"-->
 </menu>

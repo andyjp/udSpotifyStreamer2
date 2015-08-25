@@ -5,12 +5,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.support.v4.app.DialogFragment;
+import android.app.DialogFragment;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -39,6 +42,8 @@ public class TrackPlayerFragment extends DialogFragment implements SeekBar.OnSee
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             trackPlayerBound = true;
+
+            ((MainActivity) getActivity()).trackPlayerOpened = true;
 
             TrackPlayerService.TrackPlayerBinder binder = (TrackPlayerService.TrackPlayerBinder) service;
             trackPlayerService = binder.getService();
@@ -109,6 +114,34 @@ public class TrackPlayerFragment extends DialogFragment implements SeekBar.OnSee
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        Log.v(LOG_TAG, "onPrepareOptionsMenu");
+        MenuItem nowPlayigBtn = menu.findItem(R.id.now_playing_button);
+        nowPlayigBtn.setVisible(false);
+        super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        Log.v(LOG_TAG, "onCreateOptionsMenu");
+        if (trackPlayerBound) {
+            MenuItem menuItem = menu.findItem(R.id.share_track);
+            ShareActionProvider shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+            if (shareActionProvider != null) {
+                shareActionProvider.setShareIntent(
+                        new Intent(Intent.ACTION_SEND)
+                                .putExtra(Intent.EXTRA_TEXT, trackPlayerService.tracksList.get(position).external_urls.get("spotify"))
+                                .setType("text/plain")
+                );
+            } else {
+                Log.v(LOG_TAG, "Share provider null");
+            }
+        }
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
@@ -119,15 +152,11 @@ public class TrackPlayerFragment extends DialogFragment implements SeekBar.OnSee
 
         Intent playIntent = new Intent(getActivity(), TrackPlayerService.class);
 
-        if (tracksList == null) {
+        if (savedInstanceState == null && !getArguments().getBoolean("noTrackInfo", false)) {
             tracksList = getArguments().getParcelableArrayList("TracksList");
             playIntent.putExtra("TracksList", tracksList);
-        }
-        if (position == -1) {
             position = getArguments().getInt("Position");
             playIntent.putExtra("Position", position);
-        }
-        if (savedInstanceState == null) {
             getActivity().startService(playIntent);
         }
         getActivity().bindService(playIntent, trackPlayerConnection, Context.BIND_AUTO_CREATE);
@@ -174,17 +203,13 @@ public class TrackPlayerFragment extends DialogFragment implements SeekBar.OnSee
     }
 
     @Override
-    public void onStop() {
-        // Unbind the service when the track player dialog is closed
+    public void onDestroyView() {
+        Log.v(LOG_TAG, "onDestroyView");
         trackPlayerBound = false;
         getActivity().unbindService(trackPlayerConnection);
-        super.onStop();
-    }
-
-    @Override
-    public void onDestroyView() {
-        if (getDialog() != null && getRetainInstance())
+        if (getDialog() != null && getRetainInstance()) {
             getDialog().setDismissMessage(null);
+        }
         super.onDestroyView();
     }
 
@@ -211,6 +236,8 @@ public class TrackPlayerFragment extends DialogFragment implements SeekBar.OnSee
                     .load(R.mipmap.ic_launcher)
                     .into(albumImage);
         }
+        ((MainActivity) getActivity()).spotifyUrl = tracksList.get(position).external_urls.get("spotify");
+        ((MainActivity) getActivity()).invalidateOptionsMenu();
     }
 
     // Functions for OnSeekBarChangeListener interface

@@ -1,13 +1,15 @@
 package com.example.aparry.spotifystreamer;
 
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.FragmentManager;
+import android.app.FragmentTransaction;
+import android.app.FragmentManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.support.v4.app.Fragment;
+import android.app.Fragment;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,10 +35,15 @@ public class TracksFragment extends Fragment {
     public ArrayList<Track> tracksList = new ArrayList<Track>();
     public TrackAdapter trackAdapter;
 
-    @Override
+    /*@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // retain this fragment
+        setRetainInstance(true);
+    }*/
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         setRetainInstance(true);
     }
 
@@ -80,7 +87,7 @@ public class TracksFragment extends Fragment {
                 } else {
                     fragmentManager.beginTransaction()
                             .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                            .replace(R.id.main_fragment, trackPlayerFragment)
+                            .replace(R.id.main_fragment, trackPlayerFragment, "TrackPlayerFragment")
                             .addToBackStack(null)
                             .commit();
                 }
@@ -113,14 +120,21 @@ public class TracksFragment extends Fragment {
             try {
                 SpotifyApi api = new SpotifyApi();
                 SpotifyService spotify = api.getService();
-                return spotify.getArtistTopTrack(params[0], Locale.getDefault().getCountry());
-            } catch (RetrofitError e) {
+                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                settings.getString("pref_country", Locale.getDefault().getCountry());
+                return spotify.getArtistTopTrack(params[0], settings.getString("pref_country", Locale.getDefault().getCountry()));
+            } catch (final RetrofitError e) {
                 Log.v(LOG_TAG, SpotifyError.fromRetrofitError(e).toString());
-                Toast.makeText(
-                        getActivity(),
-                        R.string.tracks_retrieve_error,
-                        Toast.LENGTH_SHORT
-                ).show();
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(
+                                getActivity(),
+                                R.string.tracks_retrieve_error + SpotifyError.fromRetrofitError(e).toString(),
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                });
                 return null;
             }
         }

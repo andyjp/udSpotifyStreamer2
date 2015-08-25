@@ -5,11 +5,13 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.*;
+import android.preference.PreferenceManager;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
@@ -40,29 +42,31 @@ public class TrackPlayerService extends Service
     Integer notificationId = 1;
 
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null && intent.getAction() != null) {
-            switch (intent.getAction()) {
-                case "com.example.aparry.spotifystreamer.PLAY":
-                    if (mediaPlayer.isPlaying()) {
-                        pauseSong();
-                    } else {
-                        playSong(null);
-                    }
-                    break;
-                case "com.example.aparry.spotifystreamer.NEXT":
-                    nextSong();
-                    break;
-                case "com.example.aparry.spotifystreamer.PREV":
-                    prevSong();
-                    break;
-                default:
-                    break;
-            }
-        } else {
-            tracksList = intent.getParcelableArrayListExtra("TracksList");
-            position = intent.getIntExtra("Position", -1);
-            if (tracksList != null && position > -1) {
-                playSong(tracksList.get(position));
+        if (intent != null) {
+            if (intent.getAction() != null) {
+                switch (intent.getAction()) {
+                    case "com.example.aparry.spotifystreamer.PLAY":
+                        if (mediaPlayer.isPlaying()) {
+                            pauseSong();
+                        } else {
+                            playSong(null);
+                        }
+                        break;
+                    case "com.example.aparry.spotifystreamer.NEXT":
+                        nextSong();
+                        break;
+                    case "com.example.aparry.spotifystreamer.PREV":
+                        prevSong();
+                        break;
+                    default:
+                        break;
+                }
+            } else {
+                tracksList = intent.getParcelableArrayListExtra("TracksList");
+                position = intent.getIntExtra("Position", -1);
+                if (tracksList != null && position > -1) {
+                    playSong(tracksList.get(position));
+                }
             }
         }
         return super.onStartCommand(intent, flags, startId);
@@ -184,40 +188,52 @@ public class TrackPlayerService extends Service
     };
 
     public void createNotification(String type) {
-        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        if (settings.getBoolean("pref_notifications", true)) {
+            notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        Intent prevIntent = new Intent(this, TrackPlayerService.class);
-        prevIntent.setAction("com.example.aparry.spotifystreamer.PREV");
-        PendingIntent prevPendingIntent = PendingIntent.getService(this, 0, prevIntent, 0);
+            Intent prevIntent = new Intent(this, TrackPlayerService.class);
+            prevIntent.setAction("com.example.aparry.spotifystreamer.PREV");
+            PendingIntent prevPendingIntent = PendingIntent.getService(this, 0, prevIntent, 0);
 
-        Intent playIntent = new Intent(this, TrackPlayerService.class);
-        playIntent.setAction("com.example.aparry.spotifystreamer.PLAY");
-        PendingIntent playPendingIntent = PendingIntent.getService(this, 0, playIntent, 0);
+            Intent playIntent = new Intent(this, TrackPlayerService.class);
+            playIntent.setAction("com.example.aparry.spotifystreamer.PLAY");
+            PendingIntent playPendingIntent = PendingIntent.getService(this, 0, playIntent, 0);
 
-        Intent nextIntent = new Intent(this, TrackPlayerService.class);
-        nextIntent.setAction("com.example.aparry.spotifystreamer.NEXT");
-        PendingIntent nextPendingIntent = PendingIntent.getService(this, 0, nextIntent, 0);
+            Intent nextIntent = new Intent(this, TrackPlayerService.class);
+            nextIntent.setAction("com.example.aparry.spotifystreamer.NEXT");
+            PendingIntent nextPendingIntent = PendingIntent.getService(this, 0, nextIntent, 0);
 
-        int playIcon = android.R.drawable.ic_media_play;
-        if (type == "play") {
-            playIcon = android.R.drawable.ic_media_pause;
+            int playIcon = android.R.drawable.ic_media_play;
+            if (type == "play") {
+                playIcon = android.R.drawable.ic_media_pause;
+            }
+
+            notificationBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(getApplicationContext())
+                    .setStyle(new NotificationCompat.MediaStyle()
+                            .setMediaSession(mediaSession.getSessionToken())
+                            .setShowActionsInCompactView(1))
+                    .setContentTitle(tracksList.get(position).artists.get(0).name)
+                    .setContentText(tracksList.get(position).album.name + " - " + tracksList.get(position).name)
+                    .setSmallIcon(playIcon)
+                    .addAction(android.R.drawable.ic_media_previous, "Previous", prevPendingIntent)
+                    .addAction(playIcon, "Play", playPendingIntent)
+                    .addAction(android.R.drawable.ic_media_next, "Next", nextPendingIntent);
+
+            Picasso.with(getApplicationContext())
+                    .load(tracksList.get(position).album.images.get(0).url)
+                    .into(target);
+
+            startForeground(notificationId, notificationBuilder.build());
         }
-
-        notificationBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(getApplicationContext())
-                .setStyle(new NotificationCompat.MediaStyle()
-                        .setMediaSession(mediaSession.getSessionToken())
-                        .setShowActionsInCompactView(1))
-                .setContentTitle(tracksList.get(position).artists.get(0).name)
-                .setContentText(tracksList.get(position).album.name + " - " + tracksList.get(position).name)
-                .setSmallIcon(playIcon)
-                .addAction(android.R.drawable.ic_media_previous, "Previous", prevPendingIntent)
-                .addAction(playIcon, "Play", playPendingIntent)
-                .addAction(android.R.drawable.ic_media_next, "Next", nextPendingIntent);
-
-        Picasso.with(getApplicationContext())
-                .load(tracksList.get(position).album.images.get(0).url)
-                .into(target);
-
-        startForeground(notificationId, notificationBuilder.build());
     }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        Log.v(LOG_TAG, "onTaskRemoved");
+        //stop service
+        stopSelf();
+        super.onTaskRemoved(rootIntent);
+    }
+
 }
